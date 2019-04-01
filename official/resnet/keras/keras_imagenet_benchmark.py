@@ -432,7 +432,7 @@ class Resnet50KerasBenchmarkReal(Resnet50KerasBenchmarkBase):
         output_dir=output_dir, default_flags=def_flags)
 
 
-class TrivialKerasBenchmark(keras_benchmark.KerasBenchmark):
+class TrivialKerasBenchmarkReal(keras_benchmark.KerasBenchmark):
   """Trivial model with real data benchmark tests."""
 
   def __init__(self, output_dir=None, root_data_dir=None, **kwargs):
@@ -463,6 +463,18 @@ class TrivialKerasBenchmark(keras_benchmark.KerasBenchmark):
         wall_time_sec,
         total_batch_size=FLAGS.batch_size,
         log_steps=FLAGS.log_steps)
+
+  def benchmark_8_gpu_warmup(self):
+    """Dummy test that runs over an epoch to warmup the machine."""
+    self._setup()
+
+    FLAGS.num_gpus = 8
+    FLAGS.enable_eager = True
+    FLAGS.model_dir = self._get_model_dir('benchmark_warmup')
+    FLAGS.batch_size = 256
+    FLAGS.train_steps = 700
+    # Run warmup test without reporting results
+    keras_imagenet_main.run(flags.FLAGS)
 
   def benchmark_1_gpu(self):
     """Test trivial Keras model (input pipeline) with 1 GPU."""
